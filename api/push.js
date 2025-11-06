@@ -1,4 +1,4 @@
-import webpush from 'web-push';
+const webpush = require('web-push');
 
 webpush.setVapidDetails(
   'mailto:you@example.com',
@@ -6,10 +6,12 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE
 );
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   try {
     const subscription = JSON.parse(process.env.SUBSCRIPTION_JSON || '{}');
-    if (!subscription.endpoint) return res.status(400).json({ error: 'Missing SUBSCRIPTION_JSON' });
+    if (!subscription.endpoint) {
+      return res.status(400).json({ error: 'Missing SUBSCRIPTION_JSON' });
+    }
 
     const title = (req.body && req.body.title) || 'New booking';
     const body  = (req.body && req.body.body)  || 'Details inside';
@@ -20,4 +22,4 @@ export default async function handler(req, res) {
     console.error(e);
     return res.status(500).json({ error: String(e) });
   }
-}
+};
