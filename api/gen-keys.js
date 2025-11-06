@@ -1,6 +1,6 @@
-import webpush from 'web-push';
+const webpush = require('web-push');
 
-export default function handler(req, res) {
+module.exports = (req, res) => {
   const keys = webpush.generateVAPIDKeys();
   res.status(200).json(keys);
-}
+};
