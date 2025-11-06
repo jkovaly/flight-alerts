@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <title>Flight Alerts</title>
+  <style>
+    body { font-family:-apple-system,system-ui,Arial; padding:20px; line-height:1.4 }
+    button { font-size:18px; padding:12px 16px; border-radius:12px; border:1px solid #ccc }
+    pre { white-space:pre-wrap; word-break:break-word; background:#f6f6f6; padding:10px; border-radius:8px }
+  </style>
+</head>
+<body>
+  <h1>Flight Alerts</h1>
+  <ol>
+    <li>On iPhone Safari: <b>Share → Add to Home Screen</b>. Then open the app icon.</li>
+    <li>Tap the button below and allow notifications.</li>
+  </ol>
+  <button id="enable">Enable Notifications</button>
+  <p id="status"></p>
+  <details style="margin-top:12px">
+    <summary>Subscription JSON (copy this if asked)</summary>
+    <pre id="subout"></pre>
+  </details>
+
+  <script>
+    function b64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i=0;i<rawData.length;i++) outputArray[i] = rawData.charCodeAt(i);
+      return outputArray;
+    }
+
+    async function enable() {
+      try {
+        document.getElementById('status').textContent = 'Setting up...';
+        await navigator.serviceWorker.register('/sw.js');
+
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          document.getElementById('status').textContent = 'Permission denied.';
+          return;
+        }
+
+        const reg = await navigator.serviceWorker.ready;
+        const r = await fetch('/api/public-key');
+        const { publicKey } = await r.json();
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: b64ToUint8Array(publicKey)
+        });
+        document.getElementById('subout').textContent = JSON.stringify(sub);
+        document.getElementById('status').textContent = '✅ Notifications enabled!';
+      } catch (e) {
+        document.getElementById('status').textContent = 'Error: ' + e;
+      }
+    }
+    document.getElementById('enable').addEventListener('click', enable);
+  </script>
+</body>
+</html>
