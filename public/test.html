@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<body style="font-family:-apple-system,system-ui;padding:20px">
+  <h3>Send a test push</h3>
+  <form id="f">
+    <label>Title <input id="t" value="📅 Test booking"></label><br><br>
+    <label>Body <input id="b" value="EGLL → EGKK 10:30Z"></label><br><br>
+    <button>Send</button>
+  </form>
+  <pre id="out"></pre>
+  <script>
+    document.getElementById('f').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const r = await fetch('/api/push', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          title: document.getElementById('t').value,
+          body:  document.getElementById('b').value
+        })
+      });
+      document.getElementById('out').textContent = await r.text();
+    });
+  </script>
+</body>
+</html>
