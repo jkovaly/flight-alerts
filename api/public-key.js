@@ -1,3 +1,3 @@
-export default function handler(req, res) {
-  return res.status(200).json({ publicKey: process.env.VAPID_PUBLIC || "" });
-}
+module.exports = (req, res) => {
+  res.status(200).json({ publicKey: process.env.VAPID_PUBLIC || "" });
+};
